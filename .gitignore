@@ -4,3 +4,4 @@ packages/
 bin/
 obj/
 wwwroot/
+App_Data/
