@@ -1,0 +1,224 @@
+﻿
+@{
+    ViewBag.Title = "Candles";
+}
+
+<div ng-app="candelesApp">
+    <div class="container" ng-controller="CandlesController">
+        <div class="modal fade" id="staticBackdrop" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="staticBackdropLabel">Edit user</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <form class="col-lg-12">
+                            <div class="form-group my-2">
+                                <label>New candle name</label>
+                                <input type="text" class="form-control" value="" ng-model="editCandleName" />
+                            </div>
+                            <div class="form-group my-2">
+                                <label>New candle image</label>
+                                <input type="text" class="form-control" value="" ng-model="editCandleImage" />
+                            </div>
+                            <div class="form-group my-2">
+                                <label>New candle describe</label>
+                                <input type="text" class="form-control" value="" ng-model="editCandleDescribe" />
+                            </div>
+                            <div class="form-group my-2">
+                                <label>New candle price</label>
+                                <input type="text" class="form-control" value="" ng-model="editCandlePrice" />
+                            </div>
+                            <div class="form-group my-2">
+                                <label>New candle amount</label>
+                                <input type="text" class="form-control" value="" ng-model="editCandleAmount" />
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                <button type="button" class="btn btn-primary" ng-click="editCandle()" data-bs-dismiss="modal">Understood</button>
+                            </div>
+                        </form>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <div class="row justify-content-between mt-4">
+            <div class="col-lg-4 col-sm-12 px-3 py-4" style="background-color: #e1f0e4; border-radius: 10px;">
+                <div class="alert alert-success col-6 d-none position-absolute bottom-0" role="alert">
+                    New candle added to database!
+                </div>
+                <h2 class="text-capitalize text-center">Add new candle</h2>
+                <form class="col-lg-12">
+                    <div class="form-group my-2">
+                        <label>Candle name</label>
+                        <input type="text" class="form-control" value="" ng-model="newCandleName" />
+                    </div>
+                    <div class="form-group my-2">
+                        <label>Candle image</label>
+                        <input type="text" class="form-control" value="" ng-model="newCandleImage" />
+                    </div>
+                    <div class="form-group my-2">
+                        <label>Candle describe</label>
+                        <input type="text" class="form-control" value="" ng-model="newCandleDescribe" />
+                    </div>
+                    <div class="form-group my-2">
+                        <label>Candele price</label>
+                        <input type="number" class="form-control" value="" ng-model="newCandlePice" />
+                    </div>
+                    <div class="form-group my-2">
+                        <label>Candele amount</label>
+                        <input type="number" class="form-control" value="" ng-model="newCandleAmount" />
+                    </div>
+                    <button type="button" class="btn btn-primary" ng-click="addCandle()">Add candle</button>
+                </form>
+            </div>
+            <div class="col-lg-7 col-sm-12">
+                <h2 class="text-capitalize text-center mt-4">All candles</h2>
+
+                <div class="d-flex justify-content-center align-items-center my-4" ng-if="!candlesLoaded" style="min-height: 50vh;">
+                    <span class="spinner-border" role="status"></span>
+                </div>
+                <table class="table" ng-if="candlesLoaded">
+                    <thead>
+                        <tr>
+                            <th>№</th>
+                            <th>Name</th>
+                            <th>Image</th>
+                            <th>Describe</th>
+                            <th>Price</th>
+                            <th>Amount</th>
+                            <th>Edit candle</th>
+                            <th>Delete candle</th>
+                        </tr>
+                    </thead>
+                    <tbody id="users">
+                        <tr ng-repeat="candle in candles">
+                            <td>{{$index + 1}}</td>
+                            <td>{{candle.CandleName}}</td>
+                            <td>{{candle.CandleImage}}</td>
+                            <td>{{candle.Describe}}</td>
+                            <td>{{candle.Price}}$</td>
+                            <td>{{candle.Amount}}</td>
+                            <td>
+                                <button type="button"
+                                        class="btn btn-warning"
+                                        data-bs-toggle="modal"
+                                        data-bs-target="#staticBackdrop"
+                                        ng-click="showModalCandle(candle.Id, candle.CandleImage, candle.CandleName, candle.Describe, candle.Price, candle.Amount)">
+                                    Edit
+                                </button>
+                            </td>
+                            <td><button class="btn btn-danger" ng-click="deleteCandle(candle.Id)">Delete</button></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    (function () {
+        angular.module('candelesApp', []).controller('CandlesController', usersController)
+
+        function usersController($scope) {
+            $scope.editCandleName = "";
+            $scope.editCandleImage = "";
+            $scope.editCandleDescribe = "";
+            $scope.editCandlePrice = "";
+            $scope.editCandleAmount = "";
+
+            $scope.newCandleName = "";
+            $scope.newCandleImage = "";
+            $scope.newCandleDescribe = "";
+            $scope.newCandlePrice = "";
+            $scope.newCandleAmount = "";
+
+            $scope.candlesLoaded = false;
+
+            $scope.onInit = () => {
+                $.get("api/candle")
+                    .then(res => {
+                        $scope.candles = JSON.parse(res).data;
+                        $scope.candlesLoaded = true;
+                        $scope.$apply();
+                    })
+                    .catch(err => console.log(err))
+            };
+
+            $scope.refresh = () => {
+                $scope.editCandleName = "";
+                $scope.editCandleImage = "";
+                $scope.editCandleDescribe = "";
+                $scope.editCandlePrice = "";
+                $scope.editCandleAmount = "";
+
+                $scope.newCandleName = "";
+                $scope.newCandleImage = "";
+                $scope.newCandleDescribe = "";
+                $scope.newCandlePrice = "";
+                $scope.newCandleAmount = "";
+            }
+
+            $scope.showModalCandle = (id, image, name, describe, price, amount) => {
+                $scope.id = id;
+                $scope.editCandleImage = image;
+                $scope.editCandleName = name;
+                $scope.editCandleDescribe = describe;
+                $scope.editCandlePrice = price;
+                $scope.editCandleAmount = amount;
+            }
+
+            $scope.addCandle = () => {
+                if (
+                    $scope.newCandleName.length     > 2 &&
+                    $scope.newCandleDescribe.length > 2 &&
+                    $scope.newCandlePrice           != null &&
+                    $scope.newCandleAmount          > 0 &&
+                    $scope.editCandleImage          != null
+                ) {
+                    const new_candle = {
+                        CandleName: $scope.newCandleName,
+                        CandleImage: $scope.newCandleImage,
+                        Describe: $scope.newCandleDescribe,
+                        Price: $scope.newCandlePrice,
+                        Amount: $scope.newCandleAmount
+                    };
+
+                    $.post("api/candle", new_candle)
+                        .then(res => {
+                            $('.alert').removeClass('d-none');
+                            setTimeout(() => $('.alert').addClass('d-none'), 3000);
+                            $scope.candles = JSON.parse(res).data;
+                            $scope.$apply();
+                            $scope.refresh();
+                        })
+                        .catch(err => console.log(err))
+                }
+            }
+
+            $scope.editCandle = (id) => {
+                console.log(id)
+            }
+
+            $scope.deleteCandle = (id) => {
+                $.ajax({
+                    url: `api/candle/${id}`,
+                    method: 'delete',
+                    data: id
+                })
+                    .then(res => {
+                        $scope.candles = JSON.parse(res).data;
+                        $scope.$apply();
+                    })
+                    .catch(err => console.log(err))
+            }
+            $scope.onInit();
+        }
+    }())
+
+</script>
+

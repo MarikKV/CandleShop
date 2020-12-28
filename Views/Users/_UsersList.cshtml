@@ -1,0 +1,167 @@
+﻿<h2>Hello it's users page</h2>
+
+<div ng-app="usersApp">
+    <div class="container" ng-controller="UsersController">
+        <div class="modal fade" id="staticBackdrop" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="staticBackdropLabel">Edit user</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <form class="col-lg-12" id="new_user_form" onsubmit="editUser(); return false;">
+                            <div class="form-group my-2">
+                                <label for="FirstName">New user name</label>
+                                <input type="text" class="form-control" value="" ng-model="name" name="FirstName" />
+                            </div>
+                            <div class="form-group my-2">
+                                <label for="LastName">New user last name</label>
+                                <input type="text" class="form-control" value="" ng-model="lastName" name="LastName" />
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                <button type="submit" class="btn btn-primary">Understood</button>
+                            </div>
+                        </form>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <div class="row justify-content-between mt-4">
+            <div class="col-lg-4 col-sm-12 px-3 py-4" style="background-color: #e1f0e4; border-radius: 10px;">
+                <div class="alert alert-success col-6 d-none position-absolute bottom-0" role="alert">
+                    New users added to database!
+                </div>
+                <h2 class="text-capitalize text-center">Add new user</h2>
+                <form class="col-lg-12" id="user_form" ">
+                    <div class="form-group my-2">
+                        <label for="FirstName">User name</label>
+                        <input type="text" class="form-control" value="" ng-model="newUserName" />
+                    </div>
+                    <div class="form-group my-2">
+                        <label for="LastName">User last name</label>
+                        <input type="text" class="form-control" value="" ng-model="newUserLastName" />
+                    </div>
+                    <button class="btn btn-primary" ng-click="addUser()">Add user</button>
+                </form>
+            </div>
+            <div class="col-lg-7 col-sm-12">
+                <h2 class="text-capitalize text-center mt-4">All users</h2>
+
+                <div class="d-flex justify-content-center align-items-center my-4" ng-if="!usersLoaded" style="min-height: 50vh;">
+                    <span class="spinner-border" role="status"></span>
+                </div>
+                <table class="table" ng-if="usersLoaded">
+                    <thead>
+                        <tr>
+                            <th>№</th>
+                            <th>Name</th>
+                            <th>Last name</th>
+                            <th>Edit user</th>
+                            <th>Delete user</th>
+                        </tr>
+                    </thead>
+                    <tbody id="users">
+                        <tr ng-repeat="user in users">
+                            <td>{{$index + 1}}</td>
+                            <td>{{user.FirstName}}</td>
+                            <td>{{user.LastName}}</td>
+                            <td>
+                                <button type="button"
+                                        class="btn btn-warning"
+                                        data-bs-toggle="modal"
+                                        data-bs-target="#staticBackdrop"
+                                        ng-click="showModalUser(user.Id, user.FirstName, user.LastName)">
+                                    Edit
+                                </button>
+                            </td>
+                            <td><button class="btn btn-danger" ng-click="deleteUser(user.Id)">Delete</button></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    (function () {
+        angular.module('usersApp', []).controller('UsersController', usersController)
+
+        function usersController($scope) {
+            $scope.editUserName = "";
+            $scope.editUserLastName = "";
+
+            $scope.newUserName = "";
+            $scope.newUserLastName = "";
+
+            $scope.usersLoaded = false;
+
+
+            $scope.onInit = () => {
+                $.get("api/user")
+                    .then(res => {
+                        $scope.users = JSON.parse(res).data;
+                        $scope.usersLoaded = true;
+                        $scope.$apply();
+                    })
+                    .catch(err => console.log(err))
+            };
+            $scope.refreshUsers = () => {
+                $scope.editUserName = "";
+                $scope.editUserLastName = "";
+                $scope.newUserName = "";
+                $scope.newUserLastName = "";
+            }
+
+            $scope.showModalUser = (id, name, lastName) => {
+                $scope.id = id;
+                $scope.editUserName = name;
+                $scope.editUserLastName = lastName;
+            }
+
+            $scope.addUser = () => {
+                if ( $scope.newUserName.length > 2 && $scope.newUserLastName.length > 2 ) {
+                    const new_user = {
+                        FirstName: $scope.newUserName,
+                        LastName: $scope.newUserLastName
+                    };
+
+                    $.post("api/user", new_user)
+                        .then(res => {
+                            $('.alert').removeClass('d-none');
+                            setTimeout(() => $('.alert').addClass('d-none'), 3000);
+                            $scope.users = JSON.parse(res).data;
+                            $scope.$apply();
+                            $scope.refreshUsers();
+                        })
+                        .catch(err => console.log(err))
+                }
+            }
+
+            $scope.editUser = (id) => {
+                console.log(id)
+            }
+
+            $scope.deleteUser = (id) => {
+                $.ajax({
+                    url: `api/user/${id}`,
+                    method: 'delete',
+                    data: id
+                })
+                    .then(res => {
+                        $scope.users = JSON.parse(res).data;
+                        $scope.$apply();
+                    })
+                    .catch(err => console.log(err))
+            }
+            $scope.onInit();
+        }
+    }())
+
+</script>
+
+
