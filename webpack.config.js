@@ -23,12 +23,12 @@ module.exports = (env, argv) => {
                             {
                                 loader: 'postcss-loader',
                                 options: {
-                                    config: {
-                                        ctx: {
-                                            env: argv.mode
-                                        }
-                                    }
-                                }
+                                    // All postcss options is now under `postcssOptions`
+                                    postcssOptions: {
+                                        config: path.resolve('src/sass', 'postcss.config.js'),
+                                    },
+                                    sourceMap: true,
+                                },
                             },
                             'sass-loader'
                         ]
