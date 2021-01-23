@@ -6,6 +6,8 @@ using System.Net.Http;
 using System.Web.Http;
 using CandleShop.Models;
 using System.Net.Mail;
+using System.IO;
+using System.Web;
 
 namespace CandleShop.Controllers
 {
@@ -28,7 +30,8 @@ namespace CandleShop.Controllers
         {
             MailMessage mm = new MailMessage(mail.From, mail.To);
             mm.Subject = mail.Subject;
-            mm.Body = mail.Body;
+            mm.IsBodyHtml = true;
+            mm.Body = PopulateBody("marian", "123456");
 
             SmtpClient smtp = new SmtpClient();
             smtp.Host = "smtp.gmail.com";
@@ -41,6 +44,16 @@ namespace CandleShop.Controllers
             smtp.Send(mm);
 
             return "Mail send successfully!";
+        }
+
+        private string PopulateBody(string user_name, string order_id)
+        {;
+            string body = System.IO.File.ReadAllText(HttpContext.Current.Server.MapPath("~/MailTemplates/NewOrder.html"));
+            
+            body = body.Replace("{user_name}", user_name);
+            body = body.Replace("{order_id}", order_id);
+
+            return body;
         }
 
     }

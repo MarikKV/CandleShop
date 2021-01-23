@@ -92,11 +92,12 @@
 <script>
     function sendEmai() {
         console.log("mail sended")
+       
         $.post("api/mail", {
             To: "kosaniakm@gmail.com",
             From: "candleshooplviv@gmail.com",
             Subject: "kurwa test",
-            Body: "kurwa text"
+            Body: ""
         })
             .then(res => console.log(res))
             .catch(err => console.log(err))
